@@ -1,79 +1,60 @@
 from src.bank import Bank
-from src.exceptions import (
-    AccountNotFoundError,
-    InsufficientFundsError,
-    AccountClosedError,
-)
+from src.exceptions import AccountNotFoundError, InsufficientFundsError, AccountClosedError
 
 def run():
     bank = Bank()
-
-    menu = """
-=== SecureBank ===
-1. Create Account
-2. Deposit
-3. Withdraw
-4. Check Balance
-5. Close Account
-6. List Accounts
-0. Exit
-> """
-
     while True:
-        choice = input(menu).strip()
+        print("\n1.Create  2.Deposit  3.Withdraw  4.Transfer  5.Reverse  6.Find by Name  0.Exit")
+        choice = input("> ").strip()
 
         if choice == "1":
-            name = input("Owner name: ").strip()
-            amt = float(input("Initial deposit (0 for none): "))
-            acc = bank.create_account(name, amt)
-            print(f"Created: {acc.account_id} | {acc.owner_name} | ₹{acc.balance:.2f}")
+            name = input("Name: ").strip()
+            acc = bank.create_account(name)
+            print(f"Created: {acc.account_id} | {acc.owner_name} | {acc.balance}")
 
         elif choice == "2":
-            aid = input("Account ID: ").strip()
+            aid = input("ID: ").strip()
             amt = float(input("Amount: "))
             try:
                 acc = bank.deposit(aid, amt)
-                print(f"Deposited. New balance: ₹{acc.balance:.2f}")
+                print(f"Balance: {acc.balance}")
             except (AccountNotFoundError, AccountClosedError, ValueError) as e:
                 print(f"Error: {e}")
 
         elif choice == "3":
-            aid = input("Account ID: ").strip()
+            aid = input("ID: ").strip()
             amt = float(input("Amount: "))
             try:
                 acc = bank.withdraw(aid, amt)
-                print(f"Withdrawn. New balance: ₹{acc.balance:.2f}")
-            except (AccountNotFoundError, AccountClosedError,
-                    InsufficientFundsError, ValueError) as e:
+                print(f"Balance: {acc.balance}")
+            except (AccountNotFoundError, AccountClosedError, InsufficientFundsError, ValueError) as e:
                 print(f"Error: {e}")
 
         elif choice == "4":
-            aid = input("Account ID: ").strip()
+            fid = input("From ID: ").strip()
+            tid = input("To ID: ").strip()
+            amt = float(input("Amount: "))
             try:
-                bal = bank.get_balance(aid)
-                print(f"Balance: ₹{bal:.2f}")
-            except (AccountNotFoundError, AccountClosedError) as e:
+                txn = bank.transfer(fid, tid, amt)
+                print(f"Transfer done. TXN ID: {txn.transaction_id}")
+            except (AccountNotFoundError, AccountClosedError, InsufficientFundsError, ValueError) as e:
                 print(f"Error: {e}")
 
         elif choice == "5":
-            aid = input("Account ID: ").strip()
+            aid = input("Account ID to reverse last transaction: ").strip()
             try:
-                acc = bank.close_account(aid)
-                print(f"Account {acc.account_id} closed.")
-            except (AccountNotFoundError, AccountClosedError) as e:
+                bank.reverse_last_transaction(aid)
+                print(f"Last transaction reversed.")
+            except (AccountNotFoundError, ValueError) as e:
                 print(f"Error: {e}")
 
         elif choice == "6":
-            accounts = bank.list_accounts()
+            name = input("Name to search: ").strip()
+            accounts = bank.find_by_name(name)
             if not accounts:
-                print("No accounts.")
+                print("No accounts found.")
             for acc in accounts:
-                status = "ACTIVE" if acc.is_active else "CLOSED"
-                print(f"{acc.account_id} | {acc.owner_name} | ₹{acc.balance:.2f} | {status}")
+                print(f"{acc.account_id} | {acc.owner_name} | {acc.balance}")
 
         elif choice == "0":
-            print("Goodbye.")
             break
-
-        else:
-            print("Invalid choice.")
