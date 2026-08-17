@@ -1,19 +1,19 @@
 from dataclasses import dataclass, field
 from datetime import datetime
+import uuid
 
 @dataclass
 class Account:
-    account_id: str
-    owner_name: str
-    balance: float = 0.0
+    account_id: int
+    name: str
+    balance: float
     is_active: bool = True
-    created_at: datetime = field(default_factory=datetime.now)
-
+    transactions: list = field(default_factory=list)
 
 @dataclass
 class Transaction:
-    transaction_id: str
-    from_id: str
-    to_id: str=""
+    txn_id: str
+    txn_type: str       
     amount: float
-    created_at: datetime = field(default_factory=datetime.now)
+    to_id: int | None = None
+    timestamp: datetime = field(default_factory=datetime.now)
