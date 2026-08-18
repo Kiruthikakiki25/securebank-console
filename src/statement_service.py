@@ -1,3 +1,4 @@
+from datetime import datetime
 from sortedcontainers import SortedDict
 from src.bank import Bank
 
@@ -9,7 +10,6 @@ class StatementService:
         self._by_balance: SortedDict = SortedDict()
 
     def register(self, account_id: int):
-        """Call after every bank.create() to index the account."""
         acc = self.bank.get(account_id)
         self._by_id[account_id] = acc
         self._by_balance[(acc.balance, account_id)] = acc
@@ -21,5 +21,15 @@ class StatementService:
         return list(self._by_balance.values())
 
     def accounts_in_id_range(self, lo: int, hi: int) -> list:
-        """irange() — no manual loop, O(log n) range query."""
-        return [self._by_id[k] for k in self._by_id.irange(lo, hi)]a1 = bank.create("Alice", 500.0)
+        return [self._by_id[k] for k in self._by_id.irange(lo, hi)]
+
+    def statement(self, account_id: int, start: datetime, end: datetime) -> list:
+        acc = self.bank.get(account_id)
+        txn_sorted = SortedDict()
+        for txn in acc.transactions:
+            key = (txn.timestamp, txn.txn_id)
+            txn_sorted[key] = txn
+        return [
+            txn_sorted[k]
+            for k in txn_sorted.irange((start, ""), (end, "\xff"))
+        ]
