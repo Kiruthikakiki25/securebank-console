@@ -1,5 +1,6 @@
 from src.json_repository import JsonAccountRepository
-from src.repository import AccountRepository
+from src.services.account_service import AccountService
 
-def get_repository() -> AccountRepository:
-    return JsonAccountRepository()
+def get_service() -> AccountService:
+    repo = JsonAccountRepository()
+    return AccountService(repo)
